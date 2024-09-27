@@ -10,7 +10,7 @@ import (
 const (
 	Subscribers = 1000
 	Messages    = 10000
-	Buffer 	= 100
+	Buffer      = 100
 )
 
 func BenchmarkAllLinkedList(b *testing.B) {
@@ -24,7 +24,8 @@ func BenchmarkAllLinkedList(b *testing.B) {
 				wg.Done()
 			}
 
-			_ = value
+			mesg := value
+			_ = mesg
 		})
 	}
 
