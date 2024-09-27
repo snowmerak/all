@@ -119,13 +119,11 @@ func (all *AsyncLinkedList[T]) Subscribe(callback func(value T, closed bool)) <-
 			all.cond.Wait()
 			all.lock.Unlock()
 
-			if cursor == nil {
-				switch last {
-				case nil:
-					cursor = all.head.Load()
-				default:
-					cursor = last.Next
-				}
+			switch last {
+			case nil:
+				cursor = all.head.Load()
+			default:
+				cursor = last.Next
 			}
 
 			for cursor != nil {
