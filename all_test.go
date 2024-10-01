@@ -10,11 +10,11 @@ import (
 const (
 	Subscribers = 1000
 	Messages    = 10000
-	Buffer 	= 100
+	Buffer      = 100
 )
 
-func BenchmarkAllLinkedList(b *testing.B) {
-	ll := all.New[[]byte](Buffer)
+func BenchmarkAllLinkedListWithFakeLock(b *testing.B) {
+	ll := all.New[[]byte](Buffer, all.FakeLock{})
 
 	wg := sync.WaitGroup{}
 	for i := 0; i < Subscribers; i++ {
@@ -34,6 +34,22 @@ func BenchmarkAllLinkedList(b *testing.B) {
 	ll.Close()
 
 	wg.Wait()
+}
+
+func BenchmarkAllLinkedListWithMutex(b *testing.B) {
+	ll := all.New[[]byte](Buffer, new(sync.Mutex))
+
+	wg := sync.WaitGroup{}
+	for i := 0; i < Subscribers; i++ {
+		wg.Add(1)
+		ll.Subscribe(func(value []byte, closed bool) {
+			if closed {
+				wg.Done()
+			}
+
+			_ = value
+		})
+	}
 }
 
 func BenchmarkChannel(b *testing.B) {

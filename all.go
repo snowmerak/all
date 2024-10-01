@@ -38,13 +38,12 @@ func (all *AsyncLinkedList[T]) getNode() *Node[T] {
 func (all *AsyncLinkedList[T]) putNode(_ *Node[T]) {
 }
 
-func New[T any](maxBufferSize int64) *AsyncLinkedList[T] {
-	l := FakeLock{}
+func New[T any](maxBufferSize int64, locker sync.Locker) *AsyncLinkedList[T] {
 	tw := timingwheel.NewTimingWheel(50*time.Millisecond, 60)
 	all := &AsyncLinkedList[T]{
 		maxBuf: maxBufferSize,
-		lock:   l,
-		cond:   sync.NewCond(l),
+		lock:   locker,
+		cond:   sync.NewCond(locker),
 		wheel:  tw,
 	}
 	tw.ScheduleFunc(all, func() {
