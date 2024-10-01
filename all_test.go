@@ -24,7 +24,8 @@ func BenchmarkAllLinkedListWithFakeLock(b *testing.B) {
 				wg.Done()
 			}
 
-			_ = value
+			mesg := value
+			_ = mesg
 		})
 	}
 

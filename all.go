@@ -2,10 +2,11 @@ package all
 
 import (
 	"fmt"
-	"github.com/RussellLuo/timingwheel"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/RussellLuo/timingwheel"
 )
 
 type FakeLock struct{}
@@ -48,6 +49,7 @@ func New[T any](maxBufferSize int64, locker sync.Locker) *AsyncLinkedList[T] {
 	}
 	tw.ScheduleFunc(all, func() {
 		if all.latestNotification.Add(10 * time.Millisecond).Before(time.Now()) {
+			all.latestNotification = time.Now()
 			all.cond.Broadcast()
 		}
 	})
@@ -116,13 +118,11 @@ func (all *AsyncLinkedList[T]) Subscribe(callback func(value T, closed bool)) <-
 			all.cond.Wait()
 			all.lock.Unlock()
 
-			if cursor == nil {
-				switch last {
-				case nil:
-					cursor = all.head.Load()
-				default:
-					cursor = last.Next
-				}
+			switch last {
+			case nil:
+				cursor = all.head.Load()
+			default:
+				cursor = last.Next
 			}
 
 			for cursor != nil {
